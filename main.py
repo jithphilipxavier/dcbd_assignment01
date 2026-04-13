@@ -4,7 +4,7 @@ from multiprocessing import Pool, cpu_count
 
 # Configuration
 BASE_URL = "http://72.60.221.150:8080"
-STUDENT_ID = "MDS202540"  # IMPORTANT: Replace with your actual student ID
+STUDENT_ID = "MDS202540"  
 
 def get_secret_key(student_id):
     """Helper function to fetch the dynamic SHA-256 session key."""
@@ -31,7 +31,7 @@ def get_publication_title(student_id, filename):
         if resp.status_code == 200:
             return resp.json().get("title", "")
         elif resp.status_code == 429:
-            time.sleep(0.5) # Handle 429 Too Many Requests
+            time.sleep(0.5) # Handles 429 Too Many Requests
         else:
             return None
 
@@ -66,16 +66,16 @@ def mapper(filename_chunk):
                 if resp.status_code == 200:
                     title = resp.json().get("title", "")
                     if title:
-                        # Extract the first word
+                        # Extracting the first word
                         words = title.strip().split()
                         if words:
                             first_word = words[0]
                             local_counts[first_word] = local_counts.get(first_word, 0) + 1
                     success = True
                 elif resp.status_code == 429:
-                    time.sleep(0.5) # Respect the 100 requests/sec limit
+                    time.sleep(0.5) # Respects the 100 requests/sec limit
                 else:
-                    success = True # Break loop on 404/500 errors to avoid infinite loops
+                    success = True # Breaks loop on 404/500 errors to avoid infinite loops
             except Exception:
                 time.sleep(0.5)
                 
@@ -85,11 +85,11 @@ if __name__ == "__main__":
     start_time = time.time()
     print("Starting Map-Reduce Job...")
     
-    # 1. Divide filenames (pub_0.txt to pub_999.txt) into chunks
+    # 1. Dividing filenames (pub_0.txt to pub_999.txt) into chunks
     total_files = 1000
     all_filenames = [f"pub_{i}.txt" for i in range(total_files)]
     
-    # Determine chunk size based on available CPU cores
+    # Determines chunk size based on available CPU cores
     num_workers = cpu_count() * 2 # Good heuristic for I/O bound network tasks
     chunk_size = (total_files // num_workers) + 1
     chunks = [all_filenames[i:i + chunk_size] for i in range(0, total_files, chunk_size)]
@@ -106,15 +106,15 @@ if __name__ == "__main__":
         for word, count in local_counts.items():
             global_counts[word] = global_counts.get(word, 0) + count
             
-    # 4. Identify Top 10
-    # Sort dictionary by value (count) in descending order
+    # 4. Identifying Top 10
+    # Sorts dictionary by value (count) in descending order
     sorted_words = sorted(global_counts.items(), key=lambda item: item[1], reverse=True)
     top_10 = [word for word, count in sorted_words[:10]]
     
     print(f"Map-Reduce finished in {round(time.time() - start_time, 2)} seconds.")
     print(f"Top 10 Words Found: {top_10}")
     
-    # 5. Verify
+    # 5. Verification
     if top_10:
         verify_top_10(STUDENT_ID, top_10)
     else:
