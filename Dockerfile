@@ -1,14 +1,14 @@
-# Use a lightweight Python base image
+# Uses a lightweight Python base image
 FROM python:3.10-slim
 
-# Set the working directory in the container
+# Setting the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
+# Copies the requirements file and installing dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copying the application code
 COPY main.py .
 
 # Command to run the application
